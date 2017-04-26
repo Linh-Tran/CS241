@@ -1,0 +1,337 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include "binarytree.h"
+
+/***********************************************************************/
+/* Linh Tran                                                           */   
+/* Date: November 3, 2014                                              */
+/* CS-241 Section # 1                                                  */
+/* Program: binarytree                                                 */
+/*                                                                     */
+/* This implements the different operations of binary tree, which      */
+/* includes a treeNode, inserting data into a binary tree, remove      */
+/* a node from tree, find th min numbers of paths, the max depth,      */
+/* if it's a binary and balance tree, printing the tree and its leaves,*/
+/* and freeing the tree.                                               */
+/* The goal to implement all these operations without leaking or losing*/
+/* any memory. This file should be run with treetest.c                 */
+/* This program implements                                             */
+/*                                                                     */                            
+/*                                                                     */
+/***********************************************************************/
+/* Alloc a new node with given data.*/
+struct TreeNode* createNode(int data)
+{
+  //alloc memory for the node using the struct TreeNode
+  struct TreeNode* node = malloc(sizeof(struct TreeNode));
+  node->data = data; //store data into the node 
+  node->left = NULL; //set the left and right node to NULL
+  node->right = NULL;//retrun node
+  return node;
+}
+
+/* Insert data at appropriate place in BST, return new tree root. */
+struct TreeNode* insertBST(struct TreeNode* root, int data)
+{
+  struct TreeNode* newNode;
+  // if the root is NULL then insert a the root
+  //change the root to be pointing to the newNode created.
+  //retrun root
+  if(root ==NULL) 
+  { 
+    newNode = createNode(data);
+    root = newNode;
+    return root;
+  }
+  //if the data is less then the root's data
+  //set the root to be the left substree
+  //otherwise set the root to be it's right subtree
+  else
+  {
+    if(data <= root->data) 
+    {
+      root->left = insertBST(root->left, data);
+    } 
+    else 
+    {
+      root->right = insertBST(root->right,data);
+    }
+    return root;
+  }
+}
+
+/* Helper function of removeBST take in a pointer root and
+ * data. Does the 3 cases check handling when data is 
+ * found in the searchData fuction. 3 cases include:
+ * 1. node remove has no children, 2. node has 1 child,
+ * 3. node w/ two child. Method is called by removeBST
+ * this function returns the root of which the tree
+ * is tranversing throgh*/
+struct TreeNode* callRemoveBST(struct TreeNode* root, int data)
+{
+  struct TreeNode* temp;
+  if(root == NULL) return root;
+  else if( data < root->data) root->left = callRemoveBST(root->left,data);
+  else if (data > root->data) root->right = callRemoveBST(root->right,data);
+  else
+  {
+    //No children: Free the root and reset root to null.
+    if(root->left == NULL && root->right==NULL)
+    {
+      free(root);
+      root = NULL;
+    }
+    //Left Child: save the root to temp and set root 
+    //to be its left substree and free the temp
+    else if (root->right == NULL && root->left !=NULL)
+    {
+      temp = root;
+      root = root->left;
+      free(temp);
+    }
+    //Right: save the root to temp and set root 
+    //to be its right substree and free the temp
+    else if (root->left == NULL && root->right!=NULL)
+    {
+      temp = root;
+      root = root->right;
+      free(temp);
+    }
+    //Two children: save the temp to point to root
+    //replace the root data with the right min node
+    //set root right to the recursive call node right min node
+    else
+    {
+      temp = root;
+      root->data = minValueBST(root->right);
+      root->right = callRemoveBST(root->right,root->data); 
+    }
+  }
+  return root;
+}
+
+/* Helper function that
+ * Finds the node in the BST tree that contains the data
+ * and return 1 if data is found otherwise return 0 */
+int searchData(struct TreeNode* root, int data)
+{
+  if(root== NULL) return 0; //if root NULL return 0
+
+  //if the data is less then root search on the
+  //left subtree
+  if(data<root->data) searchData(root->left, data);
+  //else search on the right subtree
+  else if(data >root->data) searchData(root->right,data);
+  //if found then return 1
+  else return 1;
+}
+
+/* Remove data from BST pointed to by rootRef, changing root if necessary.
+ * For simplicity's sake, always choose node's in-order
+ *   successor in the two-child case.
+ * Memory for removed node should be freed.
+ * Return 1 if data was present, 0 if not found. */
+int removeBST(struct TreeNode** rootRef, int data)
+{ 
+  //made a new node that points to rootRef
+  struct TreeNode* root = *rootRef;
+
+  //check if the data is found in the BST tree
+  //by calling searchData passing in the root and 
+  //data
+  if(searchData(root, data))
+  {
+    //callRemoveBST to handle the remove
+    //return 1
+    callRemoveBST(root, data);
+    return 1;
+  }
+  //else return 0
+  return 0;
+}
+
+/* Return minimum value in non-empty binary search tree. */
+int minValueBST(struct TreeNode* root)
+{
+  //if the root is not NULL seach for the min value found in the tree.
+  if(root!=NULL)
+  {
+    //if root has no child then return the data inside the root
+    if(root->left == NULL && root->right == NULL) return root->data;
+    //else tranverse through the tree left subtree. to find the smallest
+    //min value in the tree
+    else minValueBST(root->left);
+  }
+}
+/* Helper for isBst returns the maximum value in non-binary search tree. */
+int maxValueBST( struct TreeNode* root)
+{
+  //if the root is not NULL seach for the min value found in the tree.
+  if(root!=NULL)
+  {
+    //if root has no child then return the data inside the root
+    if(root->right== NULL && root->left == NULL) return root->data;
+    //else tranverse through the tree left subtree. to find the largest
+    //max value in the tree
+    else minValueBST(root->right);
+  }
+} 
+
+/* Return maximum depth of tree. Empty tree has depth 0.
+/* http://cslibrary.stanford.edu/110/BinaryTrees.html 
+ * goal compute the longest path inside the BST tree*/
+int maxDepth(struct TreeNode* root)
+{
+  //if the root is NULL, return 0 empty tree.
+  if(root==NULL) return 0;
+  else 
+  {
+    //to int that hold the depth of the left and right subtree
+    int depthLeft = maxDepth(root->left);
+    int depthRight = maxDepth(root->right);
+    //if depth if the left is greater then right increment left depth
+    if(depthLeft > depthRight) return depthLeft+1;
+    //else return the increment depth of the right subtree.
+    else return depthRight+1;
+  }
+  return 0;
+}
+/* A tree is balanced if both subtrees are balanced and
+ * the difference in height between the subtrees is no more than 1.
+ * Return 1 if tree is balanced, 0 if not.  
+ * Function uses two helper methods max and height to
+ *  check if the tree is balance
+ * http://www.geeksforgeeks.org/how-to-determine-if-a-
+ * binary-tree-is-balanced/
+ */
+int isBalanced(struct TreeNode* root)
+{
+  int leftHeight;
+  int rightHeight; 
+  if(root == NULL) return 1;
+ 
+  //Get the height of left and right sub trees 
+  //by using the height helper function
+  leftHeight = height(root->left);
+  rightHeight = height(root->right);
+ 
+  //if the difference btwn the left and right is less than or
+  //equal to 1 and ther right and left subtrees 
+  //then reutrn 1
+  if( abs(leftHeight-rightHeight) <= 1 && isBalanced(root->left) &&
+       isBalanced(root->right))
+  return 1;
+ 
+  //If we reach here then tree is not height-balanced 
+  return 0;
+}
+
+/* Helper that computes the maxDepth of the binary tree
+ * returns the depth of the tree using max to find the max
+ * path of the subtrees*/
+int height(struct TreeNode* node)
+{ 
+  if(node == NULL) return 0;
+  return 1 + max(height(node->left),height(node->right));
+}
+
+/* Helper that returns the greater values of the two
+ * inputes fuction used in height to find the depth
+ * if the right and left subtree find the sum
+ * of the paths. */
+int max(int a, int b)
+{
+  if( a>= b) return a;
+  else return b;
+} 
+ 
+/* Return 1 if tree is a binary search tree, 0 if not.
+ * use the two helper methods minValueBST and maxValueBST
+ * to determine the max and min value of the tree 
+ * http://cslibrary.stanford.edu/110/BinaryTrees.html*/
+int isBST(struct TreeNode* root)
+{
+  // 1. check if the root is null then is a binary tree
+  // 2. then check if max value of the left tree is greater than the
+  // root then return false;
+  // 3. then check if the least value of the right side is less than 
+  // the root then return false;
+  // 4. return call itself using the left node and right node
+  // if both conditions are tree then return value is one 
+  // otherwise it is zero.
+  if(root == NULL) return 1; 
+  if(root->left!= NULL && maxValueBST(root->left) > root->data) return 0;
+  if(root->right!=NULL && minValueBST(root->right) <=root->data) return 0;
+  return(isBST(root->left) && isBST(root->right));
+}
+
+/* Helper for printTree*/
+void callPrintTree(struct TreeNode* root)
+{
+  if(root!=NULL)
+  {
+    callPrintTree(root->left);//transverse to the left
+    printf("%d ",root->data);//print the root of the subtree
+    callPrintTree(root->right);//transverse to the right
+  } 
+}
+
+/* Print data for inorder tree traversal on single line,
+ * separated with spaces, ending with newline.
+ * Uses a helper that contains the details of
+ * in order transerval tree - callPrintTree
+ * call helper to print the tree then
+ * prints the "\n" when down.*/
+void printTree(struct TreeNode* root)
+{ 
+  callPrintTree(root);
+  printf("\n");
+}
+
+/* Helper fuction called by the printLeaves
+ * fucntion given the root seperates the 
+ * each node by a space */
+void callPrintLeaves(struct TreeNode* root)
+{
+  //if the root is not NULL tranverse
+  //through until reach leaves of the binary tree
+  if(root!=NULL)
+  { 
+    if(root->left== NULL && root->right == NULL) 
+    {
+      printf("%d ", root->data);
+    }
+    else
+    {
+      callPrintLeaves(root->left);
+      callPrintLeaves(root->right);
+    }
+  }
+}
+
+/* Print data for leaves on single line,
+ * separated with spaces, ending with newline.
+ * Uses a helper method that does the printing
+ * leaves printing then prints the newLine 
+ * when done */
+void printLeaves(struct TreeNode* root)
+{
+  callPrintLeaves(root);
+  printf("\n");
+}
+
+/* Free memory used by the tree. */
+void freeTree(struct TreeNode* root)
+{
+  //if the root is NULL stop the 
+  //tranvers free each node of the 
+  //tree starting with the left subtree
+  //first then the right subtree
+  //free the root and set the root to be null
+  if(root == NULL) return; 
+  freeTree(root->left);
+  freeTree(root->right);
+  free(root);
+  root = NULL;
+}
+

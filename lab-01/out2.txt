@@ -1,0 +1,8 @@
+total 28
+drwx------ 2 litran117 ugrad 4096 Aug 27 10:03 .
+drwxr-xr-x 3 litran117 ugrad 4096 Aug 25 16:18 ..
+-rwx------ 1 litran117 ugrad 8380 Aug 27 10:01 a.out
+-rwx------ 1 litran117 ugrad 1466 Aug 27 08:40 asciiArt.c
+-rw------- 1 litran117 ugrad 1155 Aug 27 08:44 linh-tran.txt
+-rw------- 1 litran117 ugrad   46 Aug 27 08:44 out1.txt
+-rw------- 1 litran117 ugrad    0 Aug 27  2014 out2.txt

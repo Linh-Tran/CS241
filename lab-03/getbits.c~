@@ -1,0 +1,74 @@
+/****************************************************************************/
+/* Linh Tran                                                                */
+/* Date: September 10, 2014                                                 */
+/* CS-241 Section # 1                                                       */
+/* This program                                                             */
+/****************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#define IS_SEMI 1
+#define NO_SEMI 0
+
+unsigned int getValue(unsigned int input);
+unsigned getbits(unsigned int x, unsigned int p, unsigned int n);
+
+int main (void)
+{
+	unsigned int input;
+	unsigned int x,p,n;
+	unsigned int output;
+
+	while (1)
+	{
+		x = getValue(getchar());	
+		p = getValue(getchar());
+		n = getValue(getchar());
+		// printf("(x=%d, p=%d, n=%d)\n",x,p,n);
+		if (n > p+1)
+		{
+			printf("Error\n");
+		}	
+		else if (p>31 || n>31)
+		{
+			printf("Error\n");
+		}
+		else
+		{
+			printf("getbits(x=%u,p=%u,n=%uT) = %d\n",x,p,n,getbits(x,p,n));
+		}
+		
+		// if (n== 0 && p==0 && x==0)
+		// {
+
+		// }
+	} 
+}
+
+unsigned int getValue( unsigned input)
+{
+	unsigned int num = 0;
+	if (input <'0' || input > '9')
+	{
+		printf("Error");
+	}
+	while (input>='0' && input <='9')
+	{
+		num = input - '0'+ num * 10;
+		//input = getchar();
+	}
+	if (input == EOF)
+	{
+		exit(0);
+	}
+	return num;
+}
+
+/* getbits:  get n bits from position p */   
+unsigned getbits(unsigned x, unsigned p, unsigned n)   
+{       
+	return (x >> (p+1-n)) & ~(~0 << n);   
+}
+
+
+//printf("getbits(x=%u,p=%u,n=%d)= %u\n", x,p,n,getbits(x,p,n));
